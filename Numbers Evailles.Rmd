@@ -1,0 +1,153 @@
+---
+title: "Numbers Evailles"
+output: html_document
+---
+
+## Effect
+
+If only your opponent controls a monster Special Summoned from the Extra Deck: Choose 4 "Number" Xyz Monsters with different Ranks in your Extra Deck and Special Summon 1 "Number" Xyz Monster from your Extra Deck with a number in its name equal to the total of the numbers in the names of all 4 chosen monsters, and if you do, attach all the chosen monsters to it as material, but you cannot Special Summon monsters, except "Number" Xyz Monsters, while you control that face-up Special Summoned monster. (This is treated as an Xyz Summon.)
+
+## Pre-processing the list of Numbers
+
+
+```{r}
+
+library(stringr)
+library(foreach)
+library(tibble)
+
+
+#The dataset used in order to have all Numbers
+data <- read.csv(url("https://yugipedia.com/wiki/Special:Ask/mainlabel%3D-2D/format%3Dcsv/sort%3D/order%3Dasc/offset%3D0/limit%3D500/-5B-5BConcept:CG-20cards-5D-5D-20-5B-5BCard-20type::Monster-20Card-5D-5D-20-5B-5BArchseries::Number-5D-5D/-3FEnglish-20name-20(linked)%3DName/-3FJapanese-20name/-3FPrimary-20type/-3FSecondary-20type/-3FAttribute%3D-5B-5BAttribute-5D-5D/-3FType%3D-5B-5BType-5D-5D/-3FStars-20string%3D-5B-5BLevel-5D-5D-2F-3Cbr-20-2F-3E-5B-5BRank-5D-5D/-3FATK-20string%3D-5B-5BATK-5D-5D/-3FDEF-20string%3D-5B-5BDEF-5D-5D/prettyprint%3Dtrue/unescape%3Dtrue/searchlabel%3DCSV"))
+
+names_data <- c()
+#Correct the names to be easily called
+for (i in names(data)) {
+  names_data <- c(names_data, str_extract(i,"[^X..]+[a-zA-Z]"))
+}
+
+names(data) <- names_data
+
+names(data)[names(data) == "Level"] <- "Rank"
+#Remove the useless columns and rows
+df = data[,!(names(data) %in% c("Japanese", "Secondary"))]
+
+#We also remove values that aren't Xyz Monsters
+df = df[str_detect(df[,"Primary"],"(?:Xyz Monster)"),]
+
+df <- df %>%
+  add_column(Number = NA) %>%
+  add_column(Lists = "NA")
+
+#We remove Number XX, who's not a Number with a numerical number in the name
+
+df <- df[!(str_detect(df$Name, "(?:Number )[A-Z][A-Z]")),]
+
+#We also remove the duplicate name in the "Name" column
+
+for (i in 1:nrow(df)) {
+  df[i,"Name"] <- str_extract(df[i,"Name"], "(?<=[\x7C]).*?(?=[\x5D])")
+}
+
+#Let's extract the Number of each name
+
+for (i in df$Name ) {
+  if (is.na(str_extract(i,"[^a-zA-z|: ]+"))) { 
+    #Utopia has 2 cards whose cards do not have their Number in their written name but are always treated as a specific name who has the number "39"
+    df[df$Name==i,"Number"] <- 39
+  }
+  else {  
+    df[df$Name==i,"Number"] <- str_extract(i,"[^a-zA-z|: ]+")
+  }
+}
+
+#The S0 cards have a printed Rank of 0, but are always treated as Rank 1 no matter what
+
+df[df[,"Rank"] == 0, "Rank"]<- 1
+```
+
+##Getting the combination for each monster
+
+```{r}
+
+##First, we get a ordered list of every Rank those Numbers can have
+Rank_Unique <- unique(df[, "Rank"])[order(unique(df[, "Rank"]))]
+#While it's usually between 1 and 12, with one odd Rank 13, we must always
+#consider the possibility this might change with time
+
+for (i in Rank_Unique) {
+  eval(parse(text = paste0('Current_Rank_',i, '<- which(df[,"Rank"] == i)')))
+}
+
+#We create a list of all numbers
+list_numbers = as.numeric(unique(df$Number)[order(as.numeric(unique(df$Number)))])
+
+
+Create_comb <- function(tableau, Number, liste, Ranks, result) {
+  for(len in 1:max(nrow(tableau), 1)){
+    current = tableau[len, "Rank"]
+    Ranks <- c(Ranks, tableau[len, "Rank"])
+    liste <- c(liste, tableau[len, "Number"])
+    total <- sum(as.numeric(liste))
+    if (is.na(total) == FALSE && i >= total && length(liste) < 4) {
+      #We didn't go beyond the Number sought and the list is still less than 4
+      #(Possibility the Number 0 are usable)
+      tab <- tableau[as.numeric(tableau[,"Number"]) <= i - sum(as.numeric(liste)),]
+      result <- c(result, Create_comb(tableau = tab[(tab[,"Rank"] != current),],
+                  Number = Number,
+                  liste = liste,
+                  Ranks = Ranks,
+                  result = result))
+    }
+    else if(i == total && length(liste) == 4 && anyNA(liste) == FALSE){ 
+      #We got the right combination of 4, and the tableau didn't crash
+      liste <- order(liste)
+      if (paste0("c(",toString(liste),")") %in% result == FALSE) {
+        #Check if we didn't already add the list
+        result <- c(result, paste0("c(",toString(liste),")"))
+      }
+    }
+    else{ 
+      #(i != total || length(liste) > 4 || (is.na(tableau[1,"Rank"]) <= 0 && length(liste) < 4)) 
+      #The sum of 4 was not good, the list was somehow too big 
+      #Or the tableau is empty and you can't complete the list of 4
+      result
+    }
+    
+    liste <- head(liste, -1)
+    Ranks <- head(Ranks, -1)
+  }
+  return(result)
+}
+
+for(i in list_numbers){
+  #We create a list containing all rows numbers
+  rows = 1:nrow(df)
+  #which(df$Number %in% viable_rows)
+  
+  #We remove any Number higher than the current one we're looking at
+  viable_numbers <- list_numbers[which(list_numbers <= i)]
+  
+  #
+  df_viable <- df[df$Number %in% viable_numbers,]
+  
+  if (length(unique(df_viable$Rank)) <= 3) {
+    #If we have less than 4 Ranks to check, it won't be able to be summoned
+    df[df$Number == i, "Lists"] <- "No combination possible"
+  }
+  else{
+    #browser()
+    result <- Create_comb(df_viable, i, c(), c(), c())
+    if (is.null(result)) {
+      df[df$Number == i, "Lists"] <- "No combination possible"
+    }
+    else {
+      df[df$Number == i, "Lists"] <- result
+    }
+  }
+}
+
+#which(df[,"Rank"] == 1)
+
+```
+
