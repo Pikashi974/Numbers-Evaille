@@ -1,0 +1,24 @@
+---
+title: "Numbers Evaille"
+output: html_document
+date: '2022-05-11'
+---
+
+#1 - Importation des données
+
+```{r setup, include=FALSE}
+liste_csv = read.csv("https://yugipedia.com/wiki/Special:Ask/mainlabel%3D-2D/format%3Dcsv/sort%3D/order%3Dasc/offset%3D0/limit%3D500/-5B-5BConcept:CG-20monsters-5D-5D-20-5B-5BArchseries::Number-5D-5D/-3FEnglish-20name-20(linked)%3DName/-3FJapanese-20name/-3FPrimary-20type/-3FSecondary-20type/-3FAttribute%3D-5B-5BAttribute-5D-5D/-3FType%3D-5B-5BType-5D-5D/-3FStars-20string%3D-5B-5BLevel-5D-5D-2F-3Cbr-20-2F-3E-5B-5BRank-5D-5D/-3FATK-20string%3D-5B-5BATK-5D-5D/-3FDEF-20string%3D-5B-5BDEF-5D-5D/prettyprint%3Dtrue/unescape%3Dtrue/searchlabel%3DCSV")
+```
+
+#2 - Pré-traitement des données
+
+```{r}
+impo
+liste_names <- c()
+for (variable in names(liste_csv)) {
+  
+}
+
+liste_names
+```
+
