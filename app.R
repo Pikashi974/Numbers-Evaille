@@ -17,6 +17,10 @@ getNumero <- function(liste, nom) {
 getImage <- function(liste, nom) {
   return(liste[liste[, "name"] == nom, "card_images.image_url"])
 }
+getAllAttributes <- function(liste){
+  return(unique(liste[, "attribute"]))
+}
+
 list_minus_rang <- function(liste, rang) {
   return(liste[liste[, "level"] != rang, ])
 }
@@ -98,17 +102,31 @@ ui <- fluidPage(
   # App title ----
   div(
     class = "col-sm-12",
-    h1(class = "col-sm-4", "Numbers Eveil App"),
     # Sidebar panel for inputs ----
     # sidebarPanel(
     div(
-      class = "col-sm-4",
-      selectInput(
-        inputId = "list_numbers",
-        label = "Choose the Number to summon: ",
-        width = "inherit",
-        choices = rev(liste_csv[, "name"])
-      )
+      class = "col-sm-8",
+      style = "display: grid;
+    grid-template-columns: 50% 50%;",
+      h1( "Numbers Eveil App"),
+    div(
+        id = "listnumberinit",
+        selectInput(
+          inputId = "list_numbers",
+          label = "Choose the Number to summon: ",
+          width = "inherit",
+          choices = rev(liste_csv[, "name"])
+        )
+      ),
+    # div(
+    #   h2("Options"),
+    #   checkboxGroupInput(
+    #     inputId = "option_attributes",
+    #     label = "Attributes",
+    #     choices = getAllAttributes(liste_csv),
+    #     selected = getAllAttributes(liste_csv)
+    #   )
+    # )
     ),
     div(
       class = "col-sm-4",

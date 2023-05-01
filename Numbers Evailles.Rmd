@@ -1,5 +1,5 @@
 ---
-title: "Numbers Evaille"
+title: "Numbers Eveil"
 output: html_document
 date: '2022-05-11'
 ---
@@ -8,80 +8,6 @@ date: '2022-05-11'
 
 If only your opponent [controls](https://yugipedia.com/wiki/Control "Control") a [monster](https://yugipedia.com/wiki/Monster "Monster") [Special Summoned](https://yugipedia.com/wiki/Special_Summon "Special Summon") from the [Extra Deck](https://yugipedia.com/wiki/Extra_Deck "Extra Deck"): Choose 4 "[Number](https://yugipedia.com/wiki/Number "Number")" [Xyz Monsters](https://yugipedia.com/wiki/Xyz_Monster "Xyz Monster") with different [Ranks](https://yugipedia.com/wiki/Rank "Rank") in your [Extra Deck](https://yugipedia.com/wiki/Extra_Deck "Extra Deck") and [Special Summon](https://yugipedia.com/wiki/Special_Summon "Special Summon") 1 "Number" Xyz Monster from your Extra Deck with a number in its name equal to the total of the numbers in the names of all 4 chosen monsters, and if you do, attach all the chosen monsters to it as material, but you cannot Special Summon monsters, except "Number" Xyz Monsters, while you control that face-up Special Summoned monster. (This is treated as an [Xyz Summon](https://yugipedia.com/wiki/Xyz_Summon "Xyz Summon").)
 
-#1 - Importation des données
-
-```{r setup, include=FALSE}
-#On récupère la liste des Numbers Xyz de Yugipedia
-#liste_csv = read.csv("https://yugipedia.com/wiki/Special:Ask/mainlabel%3D-2D/format%3Dcsv/sort%3D/order%3Dasc/offset%3D0/limit%3D500/-5B-5BConcept:CG-20monsters-5D-5D-20-5B-5BArchseries::Number-5D-5D/-3FEnglish-20name-20(linked)%3DName/-3FJapanese-20name/-3FPrimary-20type/-3FSecondary-20type/-3FAttribute%3D-5B-5BAttribute-5D-5D/-3FType%3D-5B-5BType-5D-5D/-3FStars-20string%3D-5B-5BLevel-5D-5D-2F-3Cbr-20-2F-3E-5B-5BRank-5D-5D/-3FATK-20string%3D-5B-5BATK-5D-5D/-3FDEF-20string%3D-5B-5BDEF-5D-5D/prettyprint%3Dtrue/unescape%3Dtrue/searchlabel%3DCSV")
-liste_csv <- read.csv(file = "Liste Numbers.csv")
-```
-
-#2 - Pré-traitement des données
-
-```{r}
-library(stringr)
-#On change les noms des colonnes
-liste_names <- c()
-for (variable in names(liste_csv)) {
-  liste_names <- c(liste_names, str_extract(string = variable,pattern = "[^X.]+"))
-}
-liste_names[7] <- "Rank"
-liste_names[4] <- "Numéro"
-
-names(liste_csv) <- liste_names
-
-#On modifie la forme des variables
-for (i in 1:nrow(liste_csv)) {
-  liste_csv$Name[i] <- str_extract(string = liste_csv$Name[i], pattern = "[a-zA-Z0-9: -/]+")
-  #On ajoute les numéros
-  liste_csv$Numéro[i] <- str_extract(string = liste_csv$Name[i], pattern = "[0-9]+")
-}
-
-#On supprime Number XX: Utopic Dark Infinity car il est sans Number
-
-liste_csv <- liste_csv[liste_csv[, "Name"] != "Number XX: Utopic Dark Infinity",]
-
-for (i in 1:nrow(liste_csv)) {
-  #Si on a un cas où le numéro n'est pas dans le nom (pour deux Utopia comme Ultimate Leo Utopia Ray)
-  if (is.na(liste_csv$Numéro[i])) {
-    liste_csv$Numéro[i] <- 39
-  }
-}
-
-liste_csv <- liste_csv[-c(2,3,8,9)]
-
-#Certains Numéros ont un Rang d'origine toujours traité à 1 mais affiche 0
-#On corrige donc l'erreur
-liste_csv[liste_csv[, "Rank"]==0, "Rank"] = 1
-
-#On ordonne le tableau par le Numéro qu'ils possèdent
-liste_csv <- liste_csv[order(as.numeric(liste_csv$Numéro)),]
-
-#Dans notre situation, on voudra vérifier les Rangs et Numéro distincts
-#En effet, si par exemple, le numéro 39 et C39 ont le même Rang et Numéro, 
-#alors ils seront utilisables pour invoquer les mêmes cartes avec les mêmes combos
-i <- 1
-while (i < nrow(liste_csv)) {
-  #On regarde donc si une tel duplication existe(en omettant le nombre qui sert de comparatif)
-  test <- liste_csv[,"Numéro"]==liste_csv[i, "Numéro"] & liste_csv[,"Rank"]==liste_csv[i, "Rank"] & liste_csv[,"Name"]!=liste_csv[i, "Name"]
-  if (any(test)) {
-    liste_csv <- liste_csv[!test,]
-    i <- 1
-  }
-  i <- i+1
-}
-```
-
-#Complétion de tableau
-
-```{r}
-#On commence par créer le tableau de résultats
-tab_result <- matrix(rep(NA, times=0), ncol=5, byrow=TRUE)
-colnames(tab_result) <- c("Number n°1","Number n°2","Number n°3","Number n°4","Number obtenu")
-
-
-
+```{r, echo = FALSE}
 
 ```
-
-c(1,2,3,4) = c(1,2,3) + c(4) = c(1,2) + c(3) + c(4) = c(1) + c(2) + c(3) + c(4) = c() + c(1) + c(2) + c(3) + c(4)

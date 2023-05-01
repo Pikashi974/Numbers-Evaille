@@ -49,7 +49,3 @@ liste_vide <- liste_vide[liste_vide$name=="No Number available",]
 liste_vide[liste_vide$name=="No Number available", "Numéro"] = 0
 liste_vide[liste_vide$name=="No Number available", "level"] = 0
 liste_vide[liste_vide$name=="No Number available", "card_images.image_url"] = as.data.frame(fromJSON(file = "https://db.ygoprodeck.com/api/v7/cardinfo.php?name=Wattcancel")$data[[1]])[, "card_images.image_url"]
-
-
-
-
