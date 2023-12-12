@@ -16,6 +16,9 @@ router.get("/sitemap", function (req, res) {
 router.get("/src/js/main.js", function (req, res) {
   res.sendFile(path.join(__dirname + "/src/js/main.js"));
 });
+router.get("/src/js/about.js", function (req, res) {
+  res.sendFile(path.join(__dirname + "/src/js/about.js"));
+});
 router.get("/src/css/index.css", function (req, res) {
   res.sendFile(path.join(__dirname + "/src/css/index.css"));
 });
