@@ -196,14 +196,14 @@ function getTruncatedList(list, number) {
 function getRank(name) {
   // /([0-9]+)/
   var jsonObj = data.find((element) => element.name === name);
-  return jsonObj.level;
+  return jsonObj.level == 0 ? 1 : jsonObj.level;
 }
 
 function removeRank(list, number) {
   return list.filter((element) => {
     var jsonObj = data.find((obj) => obj.name === element);
     // console.log(`Level: ${jsonObj.level} and Number: ${number}`);
-    return parseInt(jsonObj.level) != parseInt(number);
+    return parseInt(jsonObj.level == 0 ? 1 : jsonObj.level) != parseInt(number);
   });
 }
 
