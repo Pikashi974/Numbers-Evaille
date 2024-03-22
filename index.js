@@ -4,7 +4,7 @@ const app = express();
 const path = require("path");
 const router = express.Router();
 // Setup essential routes
-router.get("/Numbers-Evaille", function (req, res) {
+router.get("/", function (req, res) {
   res.sendFile(path.join(__dirname + "/index.html")); //__dirname : It will resolve to your project folder.
 });
 router.get("/src/html/about", function (req, res) {
@@ -24,6 +24,6 @@ router.get("/src/css/index.css", function (req, res) {
 });
 
 //add the router
-app.use("/Numbers-Evaille", router);
-app.listen(process.env.port || 3000);
-console.log("Running at Port 3000");
+app.use("/", router);
+app.listen(process.env.port || 5000);
+console.log("Running at Port 5000");
