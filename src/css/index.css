@@ -2,3 +2,8 @@
   display: grid;
   grid-template-columns: auto auto auto auto;
 }
+@media (max-width: 990px) {
+  #listSelect {
+    display: block;
+  }
+}
